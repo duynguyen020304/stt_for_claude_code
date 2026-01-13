@@ -7,6 +7,7 @@ Cross-platform desktop audio recorder with global hotkey support for Speech-to-T
 - **Global Hotkey**: Press `Ctrl+Alt+R` to start/stop recording
 - **System Tray**: Minimal UI running in system tray
 - **Auto-transcription**: Sends audio to STT server and copies text to clipboard
+- **Auto-paste**: Automatically pastes transcribed text after configurable delay (default 1.5s)
 - **Cross-platform**: Works on Windows, Linux (X11), and macOS
 
 ## Installation
@@ -31,6 +32,12 @@ python src/main.py --server http://192.168.1.100:8000
 
 # Custom hotkey
 python src/main.py --hotkey "<ctrl>+<shift>+t"
+
+# Disable auto-paste
+python src/main.py --no-auto-paste
+
+# Custom paste delay (in milliseconds)
+python src/main.py --paste-delay 2000
 ```
 
 ## Building Executable
@@ -43,6 +50,13 @@ chmod +x build.sh
 Output will be in `dist/STT-Recorder` (or `STT-Recorder.exe` on Windows).
 
 ## Platform Notes
+
+### Auto-Paste
+The auto-paste feature simulates the standard paste keystroke:
+- **Windows/Linux**: Ctrl+V
+- **macOS**: Cmd+V
+
+The delay gives you time to switch to your target application before the paste occurs.
 
 ### Linux (Wayland)
 Global hotkeys have limited support on Wayland. Consider:
