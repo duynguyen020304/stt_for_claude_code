@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-multipart
+chunkformer
+torch
+torchaudio
+numpy
+pydub
+
+# Client dependencies (optional, for testing/recording)
+# Install with: pip install -r requirements-client.txt
+pyaudio
+requests
+websockets

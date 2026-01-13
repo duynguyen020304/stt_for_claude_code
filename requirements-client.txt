@@ -1,0 +1,9 @@
+# Desktop Audio Recorder Client Dependencies
+# Install with: pip install -r requirements-client.txt
+
+pyaudio
+requests
+websockets
+
+# Optional: Better VAD
+# webrtcvad
