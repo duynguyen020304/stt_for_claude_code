@@ -99,4 +99,70 @@ pip install torchaudio --index-url https://download.pytorch.org/whl/cpu
 │   └── requirements.txt  # Server dependencies
 ├── audio_samples/        # Test audio files (Vietnamese WAV)
 ├── stt_desktop_client/   # Desktop client application
+│   └── src/
+│       ├── main.py           # Entry point
+│       ├── tray_app.py       # PyQt6 system tray UI
+│       ├── audio_recorder.py # Audio recording with ring buffer
+│       ├── stt_client.py     # HTTP client for STT server
+│       └── hotkey_manager.py # Global hotkey support
+```
+
+---
+
+## Desktop Client
+
+The desktop client (`stt_desktop_client/`) is a PyQt6-based system tray application that provides quick audio transcription with global hotkey support.
+
+### Tech Stack
+
+Python 3.12, PyQt6, sounddevice, numpy, pynput, requests
+
+### Starting the Desktop Client
+
+```bash
+cd stt_desktop_client/src && python main.py
+# Optional: Specify server URL or hotkey
+python main.py --server http://localhost:8000 --hotkey <ctrl>+<alt>+r
+```
+
+### Features
+
+- **Global hotkey recording** (default: `Ctrl+Alt+R`)
+- **System tray notifications** for transcription results
+- **Auto-copy to clipboard** - Transcribed text is automatically copied
+- **30-second max recording** with ring buffer
+
+### KDE Plasma Wayland Clipboard Fix
+
+**Issue:** On KDE Plasma with Wayland, the clipboard functionality does not work with Qt6's native Wayland backend due to known bugs in KDE Klipper and Qt6 Wayland integration.
+
+**Solution:** The client forces Qt to use the XCB (X11) backend via XWayland for reliable clipboard support.
+
+**Implementation:** (`stt_desktop_client/src/tray_app.py`, lines 85-88)
+```python
+# Force Qt to use XCB backend on Linux for better clipboard support
+# This works around KDE Plasma Wayland clipboard bugs
+if sys.platform.startswith('linux'):
+    os.environ['QT_QPA_PLATFORM'] = 'xcb'
+```
+
+This workaround is necessary because:
+1. Qt6's native Wayland clipboard has timing and ownership issues
+2. KDE Klipper may not properly sync with Qt Wayland apps
+3. XWayland provides stable clipboard support via the X11 protocol
+
+### Desktop Client Architecture
+
+**Key Components:**
+
+- **TrayApplication** (`tray_app.py`) - Main UI and orchestration
+- **AudioRecorder** (`audio_recorder.py`) - Real-time audio recording
+- **STTClient** (`stt_client.py`) - HTTP client for server communication
+- **GlobalHotkeyManager** (`hotkey_manager.py`) - Cross-platform hotkeys
+
+**Signal Flow:**
+```
+Hotkey Press → start_recording() → AudioRecorder.start()
+Hotkey Press → stop_recording() → Save WAV → STTClient.transcribe_file()
+→ result_ready signal → on_transcription_result() → Clipboard + Notification
 ```

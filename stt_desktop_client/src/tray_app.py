@@ -1,3 +1,4 @@
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -5,7 +6,7 @@ from PyQt6.QtWidgets import (
     QApplication, QSystemTrayIcon, QMenu, QMessageBox
 )
 from PyQt6.QtGui import QIcon, QAction, QPixmap, QPainter, QColor, QPen
-from PyQt6.QtCore import QObject, pyqtSignal, Qt
+from PyQt6.QtCore import QObject, pyqtSignal, Qt, QMimeData
 
 from audio_recorder import AudioRecorder
 from stt_client import STTClient
@@ -81,6 +82,11 @@ class TrayApplication:
         stt_server_url: str = "http://localhost:8000",
         hotkey: str = '<ctrl>+<alt>+r'
     ):
+        # Force Qt to use XCB backend on Linux for better clipboard support
+        # This works around KDE Plasma Wayland clipboard bugs
+        if sys.platform.startswith('linux'):
+            os.environ['QT_QPA_PLATFORM'] = 'xcb'
+
         self.app = QApplication(sys.argv)
         self.app.setQuitOnLastWindowClosed(False)
 
@@ -186,9 +192,12 @@ class TrayApplication:
             self.show_message(f"Transcription Error", result["error"])
         elif "text" in result:
             text = result["text"]
-            self.show_message("Transcription", text)
-            # Copy to clipboard
-            self.app.clipboard().setText(text)
+            # Copy to clipboard using setMimeData for better Wayland support
+            mime_data = QMimeData()
+            mime_data.setText(text)
+            self.app.clipboard().setMimeData(mime_data)
+            # Show notification with clipboard confirmation
+            self.show_message("Transcription", f"{text}\n\n(Copied to clipboard)")
         else:
             self.show_message("Result", str(result))
 
