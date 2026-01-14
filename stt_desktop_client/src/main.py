@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from hotkey_manager import GlobalHotkeyManager
+from server_manager import ServerManager
 from tray_app import TrayApplication
 import threading
 import time
@@ -24,6 +25,7 @@ class STTDesktopClient:
 
         # Initialize components
         self.hotkey_manager = GlobalHotkeyManager()
+        self.server_manager = ServerManager(server_url=stt_server_url)
         self.tray_app = None
         self.hotkey_thread = None
 
