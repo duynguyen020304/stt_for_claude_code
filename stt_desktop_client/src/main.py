@@ -18,14 +18,20 @@ class STTDesktopClient:
     def __init__(
         self,
         stt_server_url: str = "http://localhost:8000",
-        hotkey_combo: str = '<ctrl>+<alt>+r'
+        hotkey_combo: str = '<ctrl>+<alt>+r',
+        server_script: str = None,
+        auto_start: bool = True
     ):
         self.stt_server_url = stt_server_url
         self.hotkey_combo = hotkey_combo
+        self.auto_start = auto_start
 
         # Initialize components
         self.hotkey_manager = GlobalHotkeyManager()
-        self.server_manager = ServerManager(server_url=stt_server_url)
+        self.server_manager = ServerManager(
+            server_url=stt_server_url,
+            server_script_path=server_script
+        )
         self.tray_app = None
         self.hotkey_thread = None
 
@@ -35,7 +41,7 @@ class STTDesktopClient:
         print(f"Checking STT server at {self.stt_server_url}...")
 
         if not self.server_manager.is_running():
-            if self.server_manager.server_script_path:
+            if self.auto_start and self.server_manager.server_script_path:
                 print("Server not running, attempting to start...")
                 if not self.server_manager.start():
                     raise RuntimeError("Failed to start STT server")
@@ -97,12 +103,24 @@ def main():
         default="<ctrl>+<alt>+r",
         help="Global hotkey combination (default: <ctrl>+<alt>+r)"
     )
+    parser.add_argument(
+        "--server-script",
+        default=None,
+        help="Path to STT server script for auto-start"
+    )
+    parser.add_argument(
+        "--no-auto-start",
+        action="store_true",
+        help="Disable automatic server starting"
+    )
 
     args = parser.parse_args()
 
     app = STTDesktopClient(
         stt_server_url=args.server,
-        hotkey_combo=args.hotkey
+        hotkey_combo=args.hotkey,
+        server_script=args.server_script,
+        auto_start=not args.no_auto_start
     )
 
     sys.exit(app.run() or 0)
