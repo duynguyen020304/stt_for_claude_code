@@ -55,6 +55,8 @@ class STTDesktopClient:
                 print("Server not running, attempting to start...")
                 if not self.server_manager.start():
                     raise RuntimeError("Failed to start STT server")
+            elif not self.auto_start:
+                print("Auto-start disabled")
             else:
                 print("Server not running and no server script configured")
         else:

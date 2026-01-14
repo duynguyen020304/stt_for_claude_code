@@ -310,7 +310,9 @@
               "Verify ChunkFormer process is terminated"
             ]
           },
-          "status": "pending"
+          "status": "completed",
+          "notes": "Integration test PASSED - custom server script argument works correctly:\n\nBug Fix:\n- stt_server/server_chunkformer_model.py: Fixed uvicorn.run() module path\n  Changed from \"server:app\" to \"server_chunkformer_model:app\"\n  This bug prevented the server from being started as a subprocess\n\nIntegration Test Results (test_custom_server.py):\n✓ Client started with --server-script pointing to ChunkFormer server\n✓ ChunkFormer server started successfully (PID logged)\n✓ Health check passed after 4 seconds\n✓ New ChunkFormer process detected (2 processes total)\n✓ API docs accessible (FastAPI server confirmed)\n✓ Transcription endpoint works (transcribed test audio to \"tôi\")\n✓ Client terminated gracefully on SIGTERM\n✓ All spawned server processes terminated on client exit\n\nThe --server-script argument now correctly allows users to specify\nalternative server implementations (e.g., ChunkFormer vs Sherpa-ONNX).\nWhen the client exits, the custom server is properly terminated.",
+          "updated_at": "2026-01-14T13:20:53.978133+00:00"
         },
         {
           "id": "subtask-4-4",
@@ -450,6 +452,6 @@
   "qa_signoff": null,
   "status": "in_progress",
   "planStatus": "in_progress",
-  "updated_at": "2026-01-14T13:04:06.249Z",
-  "last_updated": "2026-01-14T13:03:08.566905+00:00"
+  "updated_at": "2026-01-14T13:21:47.896Z",
+  "last_updated": "2026-01-14T13:20:53.978153+00:00"
 }
