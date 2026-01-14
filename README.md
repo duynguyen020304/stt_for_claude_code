@@ -55,11 +55,63 @@ The Sherpa-ONNX implementation is recommended for its simpler setup, faster infe
 
 ## Installation
 
-### Prerequisites
+### Automated Setup (Recommended)
+
+The project includes automated setup scripts that handle:
+- Python 3.12 installation check (with automatic installation on Linux)
+- Virtual environment creation
+- All dependency installation (server & client)
+- System dependencies (PortAudio, FFmpeg)
+
+**Linux / macOS:**
+```bash
+./setup.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+.\setup.ps1
+```
+
+**Windows (Batch):**
+```cmd
+setup.bat
+```
+
+The script will guide you through optional dependencies:
+- **ChunkFormer server**: Alternative PyTorch-based model (larger, slower)
+- **Parakeet server**: English-only NeMo model (experimental)
+- **CUDA support**: GPU acceleration for Sherpa-ONNX
+
+### Manual Installation
+
+#### Prerequisites
 - Python 3.12+
 - pip
+- FFmpeg (for audio format conversion)
 
-### Server Setup
+#### System Dependencies
+
+**Linux (Debian/Ubuntu):**
+```bash
+sudo apt-get install libportaudio2 ffmpeg python3-pyaudio
+```
+
+**Linux (Fedora):**
+```bash
+sudo dnf install portaudio-devel ffmpeg python3-pyaudio
+```
+
+**macOS:**
+```bash
+brew install portaudio ffmpeg
+```
+
+**Windows:**
+- Install FFmpeg: `winget install Gyan.FFmpeg`
+- PyAudio is included in the setup script
+
+#### Server Setup
 
 **Option 1: Sherpa-ONNX Server (Recommended)**
 
