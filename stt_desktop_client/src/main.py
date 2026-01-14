@@ -1,5 +1,6 @@
 import sys
 import signal
+import os
 from pathlib import Path
 
 # Add src to path
@@ -10,6 +11,15 @@ from server_manager import ServerManager
 from tray_app import TrayApplication
 import threading
 import time
+
+# Global flag for signal handling
+_shutdown_requested = False
+
+
+def _signal_handler(signum, frame):
+    """Set shutdown flag when signal received."""
+    global _shutdown_requested
+    _shutdown_requested = True
 
 
 class STTDesktopClient:
@@ -51,7 +61,8 @@ class STTDesktopClient:
         # Create tray app (this starts QApplication)
         self.tray_app = TrayApplication(
             stt_server_url=self.stt_server_url,
-            hotkey=self.hotkey_combo
+            hotkey=self.hotkey_combo,
+            cleanup_callback=self._cleanup
         )
 
         # Register hotkey that triggers tray app toggle
@@ -72,23 +83,39 @@ class STTDesktopClient:
         print("Right-click the tray icon for options")
 
         # Setup signal handlers for clean shutdown
-        signal.signal(signal.SIGINT, self._signal_handler)
-        signal.signal(signal.SIGTERM, self._signal_handler)
+        signal.signal(signal.SIGINT, _signal_handler)
+        signal.signal(signal.SIGTERM, _signal_handler)
+
+        # Setup QTimer to check for shutdown flag (Qt-aware signal handling)
+        from PyQt6.QtCore import QTimer
+        self._shutdown_timer = QTimer()
+        self._shutdown_timer.timeout.connect(self._check_shutdown)
+        self._shutdown_timer.start(500)  # Check every 500ms
 
         # Run Qt event loop
         return self.tray_app.run()
 
-    def _signal_handler(self, signum, frame):
-        """Handle shutdown signals."""
-        print("\nShutting down...")
+    def _check_shutdown(self):
+        """Check if shutdown was requested via signal."""
+        global _shutdown_requested
+        if _shutdown_requested:
+            print("\nShutting down...")
+            self._cleanup()
+            if self.tray_app and self.tray_app.app:
+                self.tray_app.app.quit()
+
+    def _cleanup(self):
+        """Cleanup resources on application exit."""
         self.hotkey_manager.stop()
         self.server_manager.stop()
-        sys.exit(0)
 
 
 def main():
     """Application entry point."""
     import argparse
+
+    # Default server script path (relative to this file)
+    default_server_script = str(Path(__file__).parent.parent.parent / "stt_server" / "server_sherpa_onnx.py")
 
     parser = argparse.ArgumentParser(
         description="STT Desktop Client - Record and transcribe audio"
@@ -105,8 +132,8 @@ def main():
     )
     parser.add_argument(
         "--server-script",
-        default=None,
-        help="Path to STT server script for auto-start"
+        default=default_server_script,
+        help=f"Path to STT server script for auto-start (default: {default_server_script})"
     )
     parser.add_argument(
         "--no-auto-start",
