@@ -1,18 +1,27 @@
 # STT for Claude Code
 
-A **Speech-to-Text (STT) API service** built with FastAPI that provides audio transcription using the ChunkFormer ASR model, optimized for Vietnamese language transcription. The service accepts audio files via HTTP POST or WebSocket and returns transcribed text with timestamps.
+A **Speech-to-Text (STT) API service** built with FastAPI that provides audio transcription using Vietnamese ASR models. The service accepts audio files via HTTP POST or WebSocket and returns transcribed text with timestamps.
 
 Includes a desktop client with PyQt6 that provides system tray integration and global hotkey support for quick audio transcription.
+
+## Server Implementations
+
+| Implementation | Model | Framework | Recommended |
+|----------------|-------|-----------|-------------|
+| **Sherpa-ONNX** | csukuangfj/sherpa-onnx-zipformer-vi-2025-04-20 | ONNX Runtime | ✅ Yes |
+| ChunkFormer | khanhld/chunkformer-ctc-large-vie | PyTorch | Alternative |
+
+The Sherpa-ONNX implementation is recommended for its simpler setup, faster inference, and smaller model size (~258 MB).
 
 ## Features
 
 ### Server
-- **Audio Transcription**: High-quality Vietnamese speech-to-text using ChunkFormer ASR model
+- **Audio Transcription**: High-quality Vietnamese speech-to-text
 - **Multiple Input Formats**: Supports WAV, MP3, M4A, FLAC, OGG (auto-converts to WAV)
 - **Dual Interface**: REST API (`POST /transcribe`) and WebSocket (`/transcribe/ws`)
-- **Long-form Audio**: Transcribe audio up to 4 hours
-- **GPU/CPU Support**: Automatically detects and uses GPU if available
+- **GPU/CPU Support**: Configurable device selection
 - **Lazy Loading**: Model loads on first request for faster startup
+- **Auto Model Download**: Sherpa-ONNX model downloads automatically on first run
 
 ### Desktop Client
 - **Global Hotkey Recording**: Quick recording with customizable hotkey (default: `Ctrl+Alt+R`)
@@ -23,7 +32,14 @@ Includes a desktop client with PyQt6 that provides system tray integration and g
 
 ## Tech Stack
 
-### Server
+### Server (Sherpa-ONNX)
+- Python 3.12
+- FastAPI
+- Uvicorn
+- Sherpa-ONNX (csukuangfj/sherpa-onnx-zipformer-vi-2025-04-20)
+- ONNX Runtime
+
+### Server (ChunkFormer - Alternative)
 - Python 3.12
 - FastAPI
 - Uvicorn
@@ -45,6 +61,8 @@ Includes a desktop client with PyQt6 that provides system tray integration and g
 
 ### Server Setup
 
+**Option 1: Sherpa-ONNX Server (Recommended)**
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -52,6 +70,16 @@ cd stt_for_claude_code
 
 # Install server dependencies
 pip install -r stt_server/requirements.txt
+```
+
+**Option 2: ChunkFormer Server (Alternative)**
+
+```bash
+# Install server dependencies
+pip install chunkformer torch torchaudio
+
+# For CPU-only mode:
+pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
 
 ### Desktop Client Setup
@@ -65,8 +93,18 @@ pip install -r stt_desktop_client/requirements.txt
 
 ### Starting the Server
 
+**Sherpa-ONNX Server (Recommended):**
+
 ```bash
-python stt_server/server.py
+python stt_server/server_sherpa_onnx.py
+```
+
+The model (~258 MB) will be automatically downloaded on first run to `./models/sherpa-onnx-vi/`.
+
+**ChunkFormer Server (Alternative):**
+
+```bash
+python stt_server/server_chunkformer_model.py
 ```
 
 The server will start on `http://localhost:8000`
@@ -134,7 +172,18 @@ WebSocket endpoint for streaming transcription.
 
 ## Configuration
 
-### Server Configuration (`stt_server/server.py`)
+### Server Configuration
+
+**Sherpa-ONNX Server** (`stt_server/server_sherpa_onnx.py`):
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `SHERPA_ONNX_MODEL` | `"csukuangfj/sherpa-onnx-zipformer-vi-2025-04-20"` | Model identifier |
+| `MODEL_DIR` | `"./models/sherpa-onnx-vi"` | Local model cache directory |
+| `NUM_THREADS` | `4` | CPU threads for inference |
+| `DEVICE` | `"cpu"` | Execution provider (cpu/cuda) |
+
+**ChunkFormer Server** (`stt_server/server_chunkformer_model.py`):
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -146,12 +195,12 @@ WebSocket endpoint for streaming transcription.
 
 ### GPU Support
 
-By default, the server runs in CPU-only mode. To enable GPU:
-
-Remove or comment out this line in `stt_server/server.py`:
-```python
-os.environ['CUDA_VISIBLE_DEVICES'] = ""
+**Sherpa-ONNX:** Set `DEVICE = "cuda"` in `server_sherpa_onnx.py`. Install CUDA support with:
+```bash
+pip install sherpa-onnx --extra-index-url https://pypi.nvidia.com
 ```
+
+**ChunkFormer:** Remove or comment out `CUDA_VISIBLE_DEVICES = ""` in the server file.
 
 ## Project Structure
 
@@ -159,8 +208,12 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ""
 .
 ├── stt_server/           # Server package
 │   ├── __init__.py
-│   ├── server.py         # FastAPI server with ChunkFormerService
-│   └── requirements.txt  # Server dependencies
+│   ├── server_sherpa_onnx.py              # Sherpa-ONNX FastAPI server (recommended)
+│   ├── sherpa_onnx_service.py             # Sherpa-ONNX service layer
+│   ├── server_chunkformer_model.py        # ChunkFormer FastAPI server (alternative)
+│   ├── requirements.txt                   # Server dependencies
+│   └── models/
+│       └── sherpa-onnx-vi/                # Auto-downloaded Sherpa-ONNX model
 ├── stt_desktop_client/   # Desktop client application
 │   └── src/
 │       ├── main.py           # Entry point
@@ -175,9 +228,16 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ""
 
 ## Known Issues
 
-### CUDA-related Errors
+### Sherpa-ONNX Model Download
 
-If you encounter `OSError: libtorch_cuda.so` or CUDA-related errors:
+On first run, the Sherpa-ONNX server will download the model (~258 MB) from Hugging Face. Ensure you have:
+- Internet connection
+- Sufficient disk space (~300 MB recommended)
+- Write permissions in the project directory
+
+### CUDA-related Errors (ChunkFormer Only)
+
+If you encounter `OSError: libtorch_cuda.so` or CUDA-related errors with the ChunkFormer server:
 
 ```bash
 pip uninstall torchaudio -y

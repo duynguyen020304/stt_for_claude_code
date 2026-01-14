@@ -20,9 +20,10 @@ librosa
 soundfile
 
 # Sherpa-ONNX server dependencies
-# Install with: pip install sherpa-onnx
+# Install with: pip install sherpa-onnx huggingface-hub
 # For CPU-only (default):
 sherpa-onnx
+huggingface-hub
 
 # For CUDA support, install with:
 # pip install sherpa-onnx --extra-index-url https://pypi.nvidia.com
