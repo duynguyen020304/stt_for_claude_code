@@ -76,6 +76,7 @@ class STTDesktopClient:
         """Handle shutdown signals."""
         print("\nShutting down...")
         self.hotkey_manager.stop()
+        self.server_manager.stop()
         sys.exit(0)
 
 
