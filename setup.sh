@@ -142,7 +142,7 @@ install_system_dependencies() {
             # Debian/Ubuntu
             print_info "Installing PortAudio and FFmpeg..."
             sudo apt-get update -qq
-            sudo apt-get install -y libportaudio2 ffmpeg python3-pyaudio
+            sudo apt-get install -y libportaudio2 ffmpeg python3-pyaudio python3.12-venv
 
         elif [ -f /etc/redhat-release ]; then
             # RHEL/CentOS/Fedora
