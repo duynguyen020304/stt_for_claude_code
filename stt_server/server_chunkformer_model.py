@@ -44,12 +44,12 @@ def get_chunkformer_model():
 # Configuration
 # ============================================================================
 
-CHUNKFORMER_MODEL = "khanhld/chunkformer-ctc-large-vie"
+CHUNKFORMER_MODEL = "khanhld/chunkformer-rnnt-large-vie"
 CHUNK_SIZE = 64
 LEFT_CONTEXT_SIZE = 128
 RIGHT_CONTEXT_SIZE = 128
 TOTAL_BATCH_DURATION = 14400
-HOST = "0.0.0.0"
+HOST = "localhost"
 PORT = 8000
 
 # Device configuration - auto-detect with fallback

@@ -95,7 +95,7 @@ pip install torchaudio --index-url https://download.pytorch.org/whl/cpu
 .
 ├── stt_server/           # Server package
 │   ├── __init__.py
-│   ├── server.py         # FastAPI server with ChunkFormerService
+│   ├── server_chunkformer_model.py         # FastAPI server with ChunkFormerService
 │   └── requirements.txt  # Server dependencies
 ├── audio_samples/        # Test audio files (Vietnamese WAV)
 ├── stt_desktop_client/   # Desktop client application

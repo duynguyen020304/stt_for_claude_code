@@ -1,11 +1,32 @@
 fastapi
 uvicorn[standard]
 python-multipart
+numpy<2
+pydub
+
+# ChunkFormer server dependencies
+# Install with: pip install -r requirements.txt --extra-index-url https://pypi.nvidia.com
 chunkformer
 torch
 torchaudio
-numpy
-pydub
+
+# Parakeet server dependencies
+# Install with: pip install -r requirements.txt[parakeet]
+# Note: NeMo requires numpy<2
+# For CPU-only mode: pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+# For GPU mode: pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
+nemo-toolkit[asr]
+librosa
+soundfile
+
+# Sherpa-ONNX server dependencies
+# Install with: pip install sherpa-onnx
+# For CPU-only (default):
+sherpa-onnx
+
+# For CUDA support, install with:
+# pip install sherpa-onnx --extra-index-url https://pypi.nvidia.com
+# Or download specific wheels from https://github.com/k2-fsa/sherpa-onnx/releases
 
 # Client dependencies (optional, for testing/recording)
 # Install with: pip install -r requirements-client.txt
