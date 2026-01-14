@@ -57,6 +57,8 @@ class STTDesktopClient:
                     raise RuntimeError("Failed to start STT server")
             else:
                 print("Server not running and no server script configured")
+        else:
+            print("Server already running")
 
         # Create tray app (this starts QApplication)
         self.tray_app = TrayApplication(
