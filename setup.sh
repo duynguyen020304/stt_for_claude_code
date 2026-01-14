@@ -140,16 +140,19 @@ install_system_dependencies() {
     if [ "$(uname -s)" = "Linux" ]; then
         if [ -f /etc/debian_version ]; then
             # Debian/Ubuntu
-            print_info "Installing PortAudio and FFmpeg..."
+            print_info "Installing build tools, PortAudio, and FFmpeg..."
             sudo apt-get update -qq
-            sudo apt-get install -y libportaudio2 ffmpeg python3-pyaudio python3.12-venv
+            sudo apt-get install -y build-essential libportaudio2 ffmpeg python3-pyaudio python3.12-venv
 
         elif [ -f /etc/redhat-release ]; then
             # RHEL/CentOS/Fedora
-            print_info "Installing PortAudio and FFmpeg..."
+            print_info "Installing build tools, PortAudio, and FFmpeg..."
             if [ -f /etc/fedora-release ]; then
+                sudo dnf groupinstall -y "Development Tools"
                 sudo dnf install -y portaudio-devel ffmpeg python3-pyaudio
             else
+                sudo dnf groupinstall -y "Development Tools" || \
+                sudo yum groupinstall -y "Development Tools"
                 sudo dnf install -y portaudio-devel ffmpeg python3-pyaudio || \
                 sudo yum install -y portaudio-devel ffmpeg python3-pyaudio
             fi
