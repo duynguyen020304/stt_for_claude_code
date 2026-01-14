@@ -81,8 +81,6 @@ class ServerManager:
         start_time = time.time()
         while time.time() - start_time < timeout:
             if self.is_running():
-                print("Server is ready")
                 return True
             time.sleep(0.5)
-        print(f"Server failed to start within {timeout} seconds")
         return False
