@@ -31,8 +31,16 @@ class STTDesktopClient:
 
     def run(self):
         """Start the application."""
-        # Check server connection
+        # Check server connection and start if needed
         print(f"Checking STT server at {self.stt_server_url}...")
+
+        if not self.server_manager.is_running():
+            if self.server_manager.server_script_path:
+                print("Server not running, attempting to start...")
+                if not self.server_manager.start():
+                    raise RuntimeError("Failed to start STT server")
+            else:
+                print("Server not running and no server script configured")
 
         # Create tray app (this starts QApplication)
         self.tray_app = TrayApplication(
