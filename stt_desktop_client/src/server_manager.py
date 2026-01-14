@@ -31,14 +31,18 @@ class ServerManager:
         except Exception:
             return False
 
-    def start(self):
-        """Start the server as a subprocess."""
+    def start(self) -> bool:
+        """Start the server as a subprocess and wait for it to be ready.
+
+        Returns:
+            True if server started successfully and is ready, False otherwise
+        """
         if not self.server_script_path:
             raise ValueError("server_script_path not set")
 
         if self.is_running():
             print("Server already running")
-            return
+            return True
 
         python_exe = sys.executable
         try:
@@ -48,6 +52,7 @@ class ServerManager:
                 stderr=subprocess.DEVNULL
             )
             print(f"Starting STT server (PID: {self.process.pid})...")
+            return self.wait_for_ready()
         except Exception as e:
             raise RuntimeError(f"Failed to start server: {e}")
 
