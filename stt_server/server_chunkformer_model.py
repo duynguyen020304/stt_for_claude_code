@@ -360,7 +360,7 @@ if __name__ == "__main__":
     print()
 
     uvicorn.run(
-        "server:app",
+        "server_chunkformer_model:app",
         host=HOST,
         port=PORT,
         reload=False,

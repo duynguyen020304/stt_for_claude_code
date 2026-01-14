@@ -80,7 +80,8 @@ class TrayApplication:
     def __init__(
         self,
         stt_server_url: str = "http://localhost:8000",
-        hotkey: str = '<ctrl>+<alt>+r'
+        hotkey: str = '<ctrl>+<alt>+r',
+        cleanup_callback = None
     ):
         # Force Qt to use XCB backend on Linux for better clipboard support
         # This works around KDE Plasma Wayland clipboard bugs
@@ -89,6 +90,9 @@ class TrayApplication:
 
         self.app = QApplication(sys.argv)
         self.app.setQuitOnLastWindowClosed(False)
+
+        # Store cleanup callback for server cleanup
+        self.cleanup_callback = cleanup_callback
 
         # Components
         self.recorder = AudioRecorder(
@@ -220,6 +224,10 @@ class TrayApplication:
         """Quit application."""
         if self.is_recording:
             self.recorder.stop()
+        self.stt_client.close()
+        # Call cleanup callback to stop server
+        if self.cleanup_callback:
+            self.cleanup_callback()
         self.app.quit()
 
     def run(self):

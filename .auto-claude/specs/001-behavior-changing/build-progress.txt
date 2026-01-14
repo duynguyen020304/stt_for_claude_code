@@ -1,0 +1,114 @@
+=== AUTO-BUILD PROGRESS ===
+
+Project: Auto-Start Server on Client Launch
+Workspace: /home/duypc/stt_for_claude_code
+Started: 2025-01-14
+
+Workflow Type: feature
+Rationale: This is a new feature that adds automatic server lifecycle management
+            to the client application. It adds new functionality (subprocess
+            management) without modifying existing server code or data structures.
+
+Session 1 (Planner):
+- Created implementation_plan.json
+- Phases: 4
+- Total subtasks: 14
+- Created init.sh
+
+Phase Summary:
+- Phase 1 - Server Manager Class: 5 subtasks, depends on []
+  * Create ServerManager class with subprocess lifecycle management
+  * Implement is_running() method using STTClient.check_health() pattern
+  * Implement start() method with subprocess.Popen and wait_for_ready()
+  * Implement stop() method to terminate subprocess cleanly
+  * Implement wait_for_ready() method with polling and timeout
+
+- Phase 2 - Client Integration: 4 subtasks, depends on [phase-1-server-manager]
+  * Add ServerManager initialization to STTDesktopClient.__init__()
+  * Add start_server_if_needed() call in run() method
+  * Add server_manager.stop() to signal handler for clean shutdown
+  * Add --server-script and --no-auto-start command-line arguments
+
+- Phase 3 - Tray App Cleanup Hook: 1 subtask, depends on [phase-1-server-manager]
+  * Add server cleanup to TrayApplication.quit() method
+
+- Phase 4 - Integration Testing: 4 subtasks, depends on [phase-2-integration, phase-3-tray-cleanup]
+  * Test auto-start from cold (no server running)
+  * Test no duplicate server when already running
+  * Test custom server script argument
+  * Test --no-auto-start flag
+
+Services Involved:
+- stt_desktop_client: Primary - adds server subprocess management
+- stt_server: Integration - launched as subprocess by client
+
+Parallelism Analysis:
+- Max parallel phases: 2
+- Recommended workers: 1
+- Parallel groups: phase-1-server-manager and phase-3-tray-cleanup can run in parallel
+  (they depend on the same phase and modify different files)
+
+Risk Level: low
+Verification Strategy:
+- Unit tests required (subprocess management logic)
+- Security scanning: not required
+- Staging deployment: not required
+- E2E tests: manual verification of auto-start workflows
+
+=== STARTUP COMMAND ===
+
+To continue building this spec, run:
+
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 001 --parallel 1
+
+=== SESSION 2: Implementation (2025-01-14) ===
+
+Completed Subtasks:
+- Phase 1 (All): Created ServerManager class with full subprocess lifecycle management
+- Phase 2 (All): Integrated ServerManager into main.py with auto-start logic
+- Phase 3 (All): Added cleanup callback to TrayApplication.quit()
+- Phase 4 (1/4): subtask-4-1 - Auto-start from cold test PASSED
+
+Changes Made:
+1. Created stt_desktop_client/src/server_manager.py with:
+   - is_running(): Health check via /health endpoint
+   - start(): subprocess.Popen + wait_for_ready() integration
+   - stop(): terminate/wait with timeout handling
+   - wait_for_ready(): polling with timeout
+
+2. Modified stt_desktop_client/src/main.py:
+   - Added ServerManager initialization in __init__
+   - Added server auto-start logic in run() method
+   - Added Qt-aware signal handling using QTimer (signals don't work with Qt event loop)
+   - Added default server script path (server_sherpa_onnx.py)
+   - Added --server-script and --no-auto-start CLI arguments
+   - Signal handler sets flag, QTimer polls flag every 500ms
+
+3. Modified stt_desktop_client/src/tray_app.py:
+   - Added cleanup_callback parameter to __init__
+   - Modified quit() to call cleanup_callback before app.quit()
+
+Integration Test Results (subtask-4-1):
+✓ No server running at start
+✓ Client auto-started the server (console shows "Starting STT server...")
+✓ Server process verified running (PID shown in logs)
+✓ Health endpoint responding (status=healthy, model_loaded=true)
+✓ Transcription endpoint functional
+✓ Server terminated cleanly on client exit (console shows "Server stopped...")
+✓ No orphaned processes after shutdown
+
+Integration Test Results (subtask-4-2):
+✓ Started server manually (PID 485836)
+✓ Started client - console showed "Server already running"
+✓ Only one Python server process existed (no duplicate started)
+✓ Client exited - manually started server still running (PID 485836)
+✓ Cleanup successful
+
+Code Change for subtask-4-2:
+- main.py: Added 'Server already running' message in else branch when server_manager.is_running() returns True
+- Provides clear user feedback when server is already running and auto-start is skipped
+
+Pending:
+- Phase 4: Integration Testing (2 remaining subtasks: subtask-4-3, subtask-4-4)
+
+=== END SESSION 2 ===
