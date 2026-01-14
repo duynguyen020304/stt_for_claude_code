@@ -220,6 +220,7 @@ class TrayApplication:
         """Quit application."""
         if self.is_recording:
             self.recorder.stop()
+        self.stt_client.close()
         self.app.quit()
 
     def run(self):

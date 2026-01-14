@@ -46,3 +46,9 @@ class STTClient:
             return response.status_code == 200
         except Exception:
             return False
+
+    def close(self):
+        """Close the client and release resources."""
+        # No persistent connections to close in current implementation
+        # This method is provided for future extensibility
+        pass
