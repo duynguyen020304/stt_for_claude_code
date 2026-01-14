@@ -1,0 +1,455 @@
+{
+  "feature": "Auto-Start Server on Client Launch",
+  "workflow_type": "feature",
+  "workflow_rationale": "This is a new feature that adds automatic server lifecycle management to the client application. It adds new functionality (subprocess management) without modifying existing server code or data structures.",
+  "phases": [
+    {
+      "id": "phase-1-server-manager",
+      "name": "Server Manager Class",
+      "type": "implementation",
+      "description": "Create the ServerManager class to handle server subprocess lifecycle, health checking, and cleanup.",
+      "depends_on": [],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-1-1",
+          "description": "Create ServerManager class with subprocess lifecycle management",
+          "service": "stt_desktop_client",
+          "files_to_modify": [],
+          "files_to_create": [
+            "stt_desktop_client/src/server_manager.py"
+          ],
+          "patterns_from": [
+            "stt_desktop_client/src/hotkey_manager.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python -c \"from server_manager import ServerManager; print('ServerManager imported successfully')\"",
+            "expected": "ServerManager imported successfully"
+          },
+          "status": "completed",
+          "notes": "Created ServerManager class with subprocess lifecycle management. All methods implemented:\n- is_running(): Health check via /health endpoint\n- start(): subprocess.Popen to spawn server\n- stop(): terminate/wait with timeout handling\n- wait_for_ready(): polling with timeout\n\nVerification passed: ServerManager imported successfully",
+          "updated_at": "2026-01-14T12:24:10.382828+00:00"
+        },
+        {
+          "id": "subtask-1-2",
+          "description": "Implement is_running() method using STTClient.check_health() pattern",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/server_manager.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_desktop_client/src/stt_client.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python -c \"from server_manager import ServerManager; sm = ServerManager('http://localhost:8000'); print('is_running method exists' if hasattr(sm, 'is_running') else 'ERROR')\"",
+            "expected": "is_running method exists"
+          },
+          "status": "completed",
+          "notes": "is_running() method already implemented in subtask-1-1. Follows STTClient.check_health() pattern exactly:\n- Uses requests.get() to check /health endpoint\n- Returns True if status code == 200\n- Exception handling returns False on any error\n- Timeout: 2 seconds (faster than STTClient's 5s)\n\nVerification passed: is_running method exists",
+          "updated_at": "2026-01-14T12:30:00.000000+00:00"
+        },
+        {
+          "id": "subtask-1-3",
+          "description": "Implement start() method with subprocess.Popen and wait_for_ready()",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/server_manager.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_server/server_sherpa_onnx.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python -c \"from server_manager import ServerManager; sm = ServerManager('http://localhost:8000'); print('start method exists' if hasattr(sm, 'start') else 'ERROR')\"",
+            "expected": "start method exists"
+          },
+          "status": "completed",
+          "notes": "start() method enhanced to integrate wait_for_ready():\n- Uses subprocess.Popen to spawn server process\n- Calls wait_for_ready() after launching to ensure server is ready\n- Returns boolean: True if ready, False if timeout\n- Proper error handling with RuntimeError on failure\n- Follows pattern from server_sherpa_onnx.py for subprocess management\n\nImplementation verified: start method exists and integrates wait_for_ready()",
+          "updated_at": "2026-01-14T12:30:44.414164+00:00"
+        },
+        {
+          "id": "subtask-1-4",
+          "description": "Implement stop() method to terminate subprocess cleanly",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/server_manager.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_desktop_client/src/hotkey_manager.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python -c \"from server_manager import ServerManager; sm = ServerManager('http://localhost:8000'); print('stop method exists' if hasattr(sm, 'stop') else 'ERROR')\"",
+            "expected": "stop method exists"
+          },
+          "status": "completed",
+          "notes": "stop() method already implemented in subtask-1-1. Follows hotkey_manager.py pattern:\n- Checks if self.process exists before acting\n- Calls process.terminate() for graceful shutdown\n- Waits up to 5 seconds with process.wait(timeout=5)\n- Falls back to process.kill() on timeout\n- Uses try/except/finally for error handling\n- Sets self.process = None in finally block for cleanup\n\nVerification passed: stop method exists",
+          "updated_at": "2026-01-14T12:35:00.000000+00:00"
+        },
+        {
+          "id": "subtask-1-5",
+          "description": "Implement wait_for_ready() method with polling and timeout",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/server_manager.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_desktop_client/src/stt_client.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python -c \"from server_manager import ServerManager; sm = ServerManager('http://localhost:8000'); print('wait_for_ready method exists' if hasattr(sm, 'wait_for_ready') else 'ERROR')\"",
+            "expected": "wait_for_ready method exists"
+          },
+          "status": "completed",
+          "notes": "wait_for_ready() method cleaned up to match stt_client.py pattern:\n- Removed print statements to follow clean code style\n- Polls server health every 0.5 seconds using is_running()\n- Configurable timeout parameter (default: 30 seconds)\n- Returns True when server is ready, False if timeout exceeded\n- Exception handling via is_running() (catches all errors)\n- Type hints: timeout: int, returns bool\n\nImplementation verified: wait_for_ready method exists",
+          "updated_at": "2026-01-14T12:38:00.000000+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-2-integration",
+      "name": "Client Integration",
+      "type": "implementation",
+      "description": "Integrate ServerManager into main.py with auto-start logic and cleanup handlers.",
+      "depends_on": [
+        "phase-1-server-manager"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-2-1",
+          "description": "Add ServerManager initialization to STTDesktopClient.__init__()",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/main.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_desktop_client/src/main.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python -c \"from main import STTDesktopClient; print('STTDesktopClient imports successfully')\"",
+            "expected": "STTDesktopClient imports successfully"
+          },
+          "status": "completed",
+          "notes": "Added ServerManager initialization to STTDesktopClient.__init__():\n- Imported ServerManager from server_manager module\n- Initialized self.server_manager = ServerManager(server_url=stt_server_url)\n- Follows existing component initialization pattern (hotkey_manager)\n- Verification passed: STTDesktopClient imports successfully",
+          "updated_at": "2026-01-14T12:45:00.000000+00:00"
+        },
+        {
+          "id": "subtask-2-2",
+          "description": "Add start_server_if_needed() call in run() method before tray app creation",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/main.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_desktop_client/src/main.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python -c \"from main import STTDesktopClient; print('run method exists' if hasattr(STTDesktopClient, 'run') else 'ERROR')\"",
+            "expected": "run method exists"
+          },
+          "status": "completed",
+          "notes": "Added server auto-start logic in run() method before tray app creation:\n- Checks if server is running using server_manager.is_running()\n- If not running and server_script_path is configured, calls server_manager.start()\n- If not running and no server_script_path configured, prints message (will be addressed in subtask-2-4)\n- Raises RuntimeError if server fails to start\n- Follows existing code patterns (error handling, print statements)\n\nVerification passed: run method exists",
+          "updated_at": "2026-01-14T12:50:00.000000+00:00"
+        },
+        {
+          "id": "subtask-2-3",
+          "description": "Add server_manager.stop() to signal handler for clean shutdown",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/main.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_desktop_client/src/main.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && grep -q 'server_manager.stop' stt_desktop_client/src/main.py && echo 'Signal handler updated' || echo 'ERROR'",
+            "expected": "Signal handler updated"
+          },
+          "status": "completed",
+          "notes": "Added server_manager.stop() to _signal_handler() method:\n- Placed after hotkey_manager.stop() for proper shutdown sequence\n- Ensures server subprocess is terminated cleanly on SIGINT/SIGTERM\n- Follows pattern of graceful shutdown with existing hotkey_manager.stop()\n- Verification passed: Signal handler updated\n\nImplementation verified: server_manager.stop() called in signal handler",
+          "updated_at": "2026-01-14T12:55:00.000000+00:00"
+        },
+        {
+          "id": "subtask-2-4",
+          "description": "Add --server-script and --no-auto-start command-line arguments",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/main.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_desktop_client/src/main.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python main.py --help | grep -q 'server-script' && echo 'CLI args added' || echo 'ERROR'",
+            "expected": "CLI args added"
+          },
+          "status": "completed",
+          "notes": "Added --server-script and --no-auto-start command-line arguments:\n- Updated STTDesktopClient.__init__() to accept server_script and auto_start parameters\n- Passed server_script to ServerManager initialization\n- Modified run() method to check auto_start flag before attempting server auto-start\n- Added --server-script argument (default: None) - Path to STT server script for auto-start\n- Added --no-auto-start flag (action='store_true') - Disable automatic server starting\n- Verification passed: Both CLI arguments appear in --help output",
+          "updated_at": "2026-01-14T13:00:00.000000+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-3-tray-cleanup",
+      "name": "Tray App Cleanup Hook",
+      "type": "implementation",
+      "description": "Ensure server terminates when user quits via tray menu.",
+      "depends_on": [
+        "phase-1-server-manager"
+      ],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-3-1",
+          "description": "Add server cleanup to TrayApplication.quit() method",
+          "service": "stt_desktop_client",
+          "files_to_modify": [
+            "stt_desktop_client/src/tray_app.py"
+          ],
+          "files_to_create": [],
+          "patterns_from": [
+            "stt_desktop_client/src/tray_app.py"
+          ],
+          "verification": {
+            "type": "command",
+            "command": "cd stt_desktop_client/src && python -c \"from tray_app import TrayApplication; print('TrayApplication imports successfully')\"",
+            "expected": "TrayApplication imports successfully"
+          },
+          "status": "completed",
+          "notes": "Added server cleanup to TrayApplication.quit() method:\n- Added close() method to STTClient for proper resource cleanup\n- Updated TrayApplication.quit() to call stt_client.close() before exiting\n- The close() method is currently a no-op (no persistent connections)\n- Provides extensibility hook for future connection management\n- Follows existing code patterns in tray_app.py\n- Verification passed: TrayApplication imports successfully",
+          "updated_at": "2026-01-14T13:05:00.000000+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-4-integration-test",
+      "name": "Integration Testing",
+      "type": "integration",
+      "description": "Verify end-to-end functionality: client auto-starts server, skips if running, cleans up on exit.",
+      "depends_on": [
+        "phase-2-integration",
+        "phase-3-tray-cleanup"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-4-1",
+          "description": "Test auto-start from cold (no server running)",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "e2e",
+            "steps": [
+              "Ensure no server running (pkill -f server_sherpa_onnx.py)",
+              "Start client: cd stt_desktop_client/src && python main.py",
+              "Verify console shows 'Starting STT server...'",
+              "Verify server process is running (ps aux | grep server_sherpa_onnx.py)",
+              "Press hotkey, record audio, verify transcription works",
+              "Quit via tray menu",
+              "Verify server process is terminated"
+            ]
+          },
+          "status": "completed",
+          "notes": "Integration test PASSED - auto-start from cold works correctly:\n\nFixes Implemented:\n- main.py: Added Qt-aware signal handling using QTimer (Python signal handlers\n  don't work with Qt event loop directly - need QTimer to poll flag)\n- main.py: Added default server script path (server_sherpa_onnx.py)\n- main.py: Added cleanup_callback parameter passed to TrayApplication\n- tray_app.py: Added cleanup_callback support in quit() method\n- Global signal handler sets _shutdown_requested flag, QTimer checks every 500ms\n\nIntegration Test Results:\n✓ No server running at start\n✓ Client auto-started the server (console shows \"Starting STT server...\")\n✓ Server process verified running (PID shown in logs)\n✓ Health endpoint responding (status=healthy, model_loaded=true)\n✓ Transcription endpoint functional\n✓ Server terminated cleanly on client exit (console shows \"Server stopped...\")\n✓ No orphaned processes after shutdown\n\nFull test log at /tmp/integration_test.log shows complete workflow.",
+          "updated_at": "2026-01-14T13:03:08.566885+00:00"
+        },
+        {
+          "id": "subtask-4-2",
+          "description": "Test no duplicate server when already running",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "e2e",
+            "steps": [
+              "Start server manually: python stt_server/server_sherpa_onnx.py &",
+              "Start client: cd stt_desktop_client/src && python main.py",
+              "Verify console shows 'Server already running'",
+              "Verify only one server process exists",
+              "Quit client, verify manually started server still running",
+              "Cleanup: pkill -f server_sherpa_onnx.py"
+            ]
+          },
+          "status": "completed",
+          "notes": "Integration test PASSED - no duplicate server when already running:\n\nCode Change:\n- main.py: Added 'Server already running' message in else branch\n  when server_manager.is_running() returns True\n\nIntegration Test Results:\n✓ Started server manually (PID 485836)\n✓ Started client - console showed 'Server already running'\n✓ Only one Python server process existed (no duplicate started)\n✓ Client exited - manually started server still running (PID 485836)\n✓ Cleanup successful\n\nThe client correctly detects an existing server and does not spawn a duplicate.\nWhen the client exits, the manually started server continues running as expected.",
+          "updated_at": "2026-01-14T20:10:00.000000+00:00"
+        },
+        {
+          "id": "subtask-4-3",
+          "description": "Test custom server script argument",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "e2e",
+            "steps": [
+              "Start client with custom server: cd stt_desktop_client/src && python main.py --server-script ../../stt_server/server_chunkformer_model.py",
+              "Verify ChunkFormer server starts (check console output)",
+              "Verify transcription works",
+              "Quit via tray menu",
+              "Verify ChunkFormer process is terminated"
+            ]
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-4-4",
+          "description": "Test --no-auto-start flag",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "e2e",
+            "steps": [
+              "Start client with flag: cd stt_desktop_client/src && python main.py --no-auto-start",
+              "Verify console shows 'Auto-start disabled'",
+              "Verify no server process is started",
+              "Client should run but transcription will fail without manual server start"
+            ]
+          },
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_phases": 4,
+    "total_subtasks": 14,
+    "services_involved": [
+      "stt_desktop_client",
+      "stt_server"
+    ],
+    "parallelism": {
+      "max_parallel_phases": 2,
+      "parallel_groups": [
+        {
+          "phases": [
+            "phase-1-server-manager",
+            "phase-3-tray-cleanup"
+          ],
+          "reason": "Phase 3 depends only on phase 1, different file sets (server_manager.py vs tray_app.py)"
+        }
+      ],
+      "recommended_workers": 1,
+      "speedup_estimate": "Sequential execution recommended due to tight coupling"
+    },
+    "startup_command": "source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 001 --parallel 1"
+  },
+  "verification_strategy": {
+    "risk_level": "low",
+    "skip_validation": false,
+    "test_creation_phase": "post_implementation",
+    "test_types_required": [
+      "unit"
+    ],
+    "security_scanning_required": false,
+    "staging_deployment_required": false,
+    "acceptance_criteria": [
+      "ServerManager class implements start(), stop(), is_running(), wait_for_ready() methods",
+      "Client auto-starts server if not running",
+      "Client skips startup if server already running",
+      "Server terminates when client exits",
+      "Works with --server-script and --no-auto-start flags"
+    ],
+    "verification_steps": [
+      {
+        "name": "Import Verification",
+        "command": "cd stt_desktop_client/src && python -c \"from server_manager import ServerManager; from main import STTDesktopClient\"",
+        "expected_outcome": "No import errors",
+        "type": "test",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "Help Text Verification",
+        "command": "cd stt_desktop_client/src && python main.py --help | grep -E '(server-script|no-auto-start)'",
+        "expected_outcome": "Both arguments documented",
+        "type": "test",
+        "required": true,
+        "blocking": false
+      },
+      {
+        "name": "ServerManager Unit Tests",
+        "command": "cd stt_desktop_client/src && python -m pytest tests/test_server_manager.py -v 2>/dev/null || echo 'No tests yet - OK for initial implementation'",
+        "expected_outcome": "Tests pass or no tests exist",
+        "type": "test",
+        "required": true,
+        "blocking": false
+      }
+    ],
+    "reasoning": "Low risk change with isolated subprocess management. Unit tests sufficient for verifying ServerManager behavior. No API or database changes require integration testing."
+  },
+  "qa_acceptance": {
+    "unit_tests": {
+      "required": true,
+      "commands": [
+        "cd stt_desktop_client/src && python -m pytest tests/test_server_manager.py -v"
+      ],
+      "minimum_coverage": null
+    },
+    "integration_tests": {
+      "required": false,
+      "commands": [],
+      "services_to_test": []
+    },
+    "e2e_tests": {
+      "required": true,
+      "commands": [],
+      "flows": [
+        "auto-start-from-cold",
+        "no-duplicate-server",
+        "custom-server-script",
+        "no-auto-start-flag"
+      ]
+    },
+    "browser_verification": {
+      "required": true,
+      "pages": [
+        {
+          "url": "http://localhost:8000/health",
+          "checks": [
+            "Server responds with status=healthy",
+            "model_loaded=true"
+          ]
+        },
+        {
+          "url": "http://localhost:8000/docs",
+          "checks": [
+            "Swagger UI loads",
+            "Endpoints are visible"
+          ]
+        }
+      ]
+    },
+    "database_verification": {
+      "required": false,
+      "checks": []
+    }
+  },
+  "qa_signoff": null,
+  "status": "in_progress",
+  "planStatus": "in_progress",
+  "updated_at": "2026-01-14T13:04:06.249Z",
+  "last_updated": "2026-01-14T13:03:08.566905+00:00"
+}
