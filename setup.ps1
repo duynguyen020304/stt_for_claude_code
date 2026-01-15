@@ -326,11 +326,21 @@ function Set-ExecutionPolicyIfNeeded {
     # Check if running PowerShell and if execution policy allows scripts
     if ($PSVersionTable.PSVersion.Major -ge 3) {
         $currentPolicy = Get-ExecutionPolicy -Scope CurrentUser
+
         if ($currentPolicy -eq "Restricted" -or $currentPolicy -eq "Undefined") {
-            Write-Warning "PowerShell execution policy is restricted"
-            Write-Info "To activate the virtual environment, you may need to run:"
-            Write-Info "  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser"
-            Write-Info "Or use CMD with: .\.venv\Scripts\activate.bat"
+            Write-Warning "PowerShell execution policy is restricted; attempting to set to RemoteSigned for CurrentUser"
+            try {
+                Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force -ErrorAction Stop
+                Write-Success "Execution policy set to RemoteSigned for CurrentUser"
+            }
+            catch {
+                Write-Warning "Automatic Set-ExecutionPolicy failed: $($_.Exception.Message)"
+                Write-Info "Run manually: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser"
+                Write-Info "Or use CMD with: .\\.venv\\Scripts\\activate.bat"
+            }
+        }
+        else {
+            Write-Info "Execution policy already allows scripts (CurrentUser: $currentPolicy)"
         }
     }
 }
@@ -345,6 +355,9 @@ function Main {
     # Change to script directory
     $scriptPath = Get-ScriptRoot
     Set-Location $scriptPath
+
+    # Anchor the virtual environment path to the script's directory to avoid creating it elsewhere
+    $script:VENV_DIR = Join-Path $scriptPath ".venv"
 
     # Check Python version
     $pythonInfo = Test-PythonVersion
