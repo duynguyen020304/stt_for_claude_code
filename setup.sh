@@ -235,7 +235,8 @@ install_optional_dependencies() {
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         print_info "Installing ChunkFormer dependencies (CPU-only)..."
-        pip install chunkformer torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+        pip install chunkformer
+        pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
         print_success "ChunkFormer dependencies installed"
     fi
 
