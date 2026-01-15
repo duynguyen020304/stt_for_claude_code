@@ -44,6 +44,10 @@ DEFAULT_NUM_THREADS = 4
 DEFAULT_SAMPLE_RATE = 16000
 DEFAULT_DEVICE = "cpu"
 
+# VAD Configuration (energy-based)
+VAD_ENERGY_THRESHOLD = 0.01  # RMS energy threshold for speech detection (0-1)
+VAD_SPEECH_RATIO_THRESHOLD = 0.1  # Min ratio of speech frames to total frames
+
 
 # ============================================================================
 # Helper Functions
@@ -151,6 +155,44 @@ def read_wav_file(audio_path: str) -> np.ndarray:
         # Normalize to [-1, 1] range
         audio = audio.astype(np.float32) / 32768.0
         return audio
+
+
+def detect_speech(audio: np.ndarray) -> bool:
+    """
+    Detect if audio contains speech using energy-based VAD.
+
+    Args:
+        audio: Normalized audio array (float32, range [-1, 1])
+
+    Returns:
+        True if speech is detected, False otherwise
+    """
+    if len(audio) == 0:
+        return False
+
+    # Calculate RMS energy in frames
+    frame_size = int(DEFAULT_SAMPLE_RATE * 0.02)  # 20ms frames
+    speech_frames = 0
+    total_frames = 0
+
+    for i in range(0, len(audio), frame_size):
+        frame = audio[i:i + frame_size]
+        if len(frame) < frame_size:
+            continue
+
+        # Calculate RMS energy
+        rms = np.sqrt(np.mean(frame ** 2))
+
+        if rms > VAD_ENERGY_THRESHOLD:
+            speech_frames += 1
+        total_frames += 1
+
+    if total_frames == 0:
+        return False
+
+    # Check if enough frames contain speech
+    speech_ratio = speech_frames / total_frames
+    return speech_ratio >= VAD_SPEECH_RATIO_THRESHOLD
 
 
 # ============================================================================
@@ -268,10 +310,18 @@ class SherpaONNXService:
         Returns:
             Dictionary with 'text' and 'segments' keys
         """
-        recognizer = await self.get_model()
-
         # Load audio file
         audio = read_wav_file(audio_path)
+
+        # Check if audio contains speech using energy-based VAD
+        # This prevents false positives from silence/background noise
+        if not detect_speech(audio):
+            return {
+                "text": "",
+                "segments": []
+            }
+
+        recognizer = await self.get_model()
 
         # Create stream and accept waveform
         stream = recognizer.create_stream()

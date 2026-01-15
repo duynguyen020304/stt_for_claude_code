@@ -196,6 +196,12 @@ class TrayApplication:
             self.show_message(f"Transcription Error", result["error"])
         elif "text" in result:
             text = result["text"]
+            # Handle empty result (no speech detected)
+            if not text or not text.strip():
+                self.show_message("Transcription", "No speech detected")
+                self.signals.status_changed.emit("Ready")
+                return
+
             # Copy to clipboard using setMimeData for better Wayland support
             mime_data = QMimeData()
             mime_data.setText(text)

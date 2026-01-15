@@ -265,8 +265,10 @@ print_completion_message() {
     echo
     echo -e "${GREEN}Environment is ready to use!${NC}"
     echo
-    echo "To activate the virtual environment, run:"
+    echo "To activate the virtual environment (from the project root), run:"
     echo -e "  ${YELLOW}source $VENV_DIR/bin/activate${NC}"
+    echo "If you are inside stt_desktop_client/src, use:"
+    echo -e "  ${YELLOW}source ../$VENV_DIR/bin/activate${NC}"
     echo
     echo "To start the Sherpa-ONNX server (recommended):"
     echo -e "  ${YELLOW}python stt_server/server_sherpa_onnx.py${NC}"
