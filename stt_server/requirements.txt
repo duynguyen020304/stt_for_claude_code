@@ -34,3 +34,4 @@ huggingface-hub
 pyaudio
 requests
 websockets
+pyqt6
