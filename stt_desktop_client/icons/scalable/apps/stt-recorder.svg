@@ -1,27 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4A90D9;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#357ABD;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256"
+     xmlns="http://www.w3.org/2000/svg">
   <!-- Circle background -->
-  <circle cx="32" cy="32" r="30" fill="url(#grad1)" stroke="#2C5F8D" stroke-width="2"/>
+  <circle cx="128" cy="128" r="120"
+          fill="#4A90D9" stroke="#2C5F8D" stroke-width="8.0"/>
 
   <!-- Microphone body -->
-  <rect x="26" y="18" width="12" height="20" rx="6" fill="#FFFFFF" stroke="#2C5F8D" stroke-width="1.5"/>
+  <rect x="104" y="96" width="48" height="80"
+        rx="24.0" ry="24.0"
+        fill="#FFFFFF" stroke="#2C5F8D" stroke-width="6.0"/>
 
   <!-- Microphone grille lines -->
-  <line x1="26" y1="24" x2="38" y2="24" stroke="#E0E0E0" stroke-width="1"/>
-  <line x1="26" y1="28" x2="38" y2="28" stroke="#E0E0E0" stroke-width="1"/>
-  <line x1="26" y1="32" x2="38" y2="32" stroke="#E0E0E0" stroke-width="1"/>
+  <g stroke="#E0E0E0" stroke-width="4.0">
+    <line x1="112.0" y1="120.0"
+          x2="144.0" y2="120.0"/>
+    <line x1="112.0" y1="136.0"
+          x2="144.0" y2="136.0"/>
+    <line x1="112.0" y1="152.0"
+          x2="144.0" y2="152.0"/>
+  </g>
 
   <!-- Microphone stand -->
-  <path d="M 32 38 L 32 46" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
-  <line x1="26" y1="46" x2="38" y2="46" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+  <line x1="128" y1="176" x2="128" y2="208"
+        stroke="#FFFFFF" stroke-width="12.0" stroke-linecap="round"/>
+  <line x1="104.0" y1="208"
+        x2="152.0" y2="208"
+        stroke="#FFFFFF" stroke-width="12.0" stroke-linecap="round"/>
 
   <!-- Sound waves -->
-  <path d="M 44 26 Q 48 28 48 32 Q 48 36 44 38" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-  <path d="M 48 24 Q 54 28 54 32 Q 54 36 48 40" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 168 104.0
+           A 16.0 24.0 0 0 1 168 152.0"
+        fill="none" stroke="#FFFFFF" stroke-width="8.0" stroke-linecap="round"/>
+  <path d="M 192 96.0
+           A 24.0 32.0 0 0 1 192 160.0"
+        fill="none" stroke="#FFFFFF" stroke-width="8.0" stroke-linecap="round"/>
 </svg>
