@@ -142,7 +142,7 @@ install_system_dependencies() {
             # Debian/Ubuntu
             print_info "Installing build tools, PortAudio, and FFmpeg..."
             sudo apt-get update -qq
-            sudo apt-get install -y build-essential libportaudio2 ffmpeg python3-pyaudio python3.12-venv libevdev-dev portaudio19-dev
+            sudo apt-get install -y build-essential libportaudio2 ffmpeg python3-pyaudio python3.12-venv python3.12-dev libevdev-dev portaudio19-dev
 
         elif [ -f /etc/redhat-release ]; then
             # RHEL/CentOS/Fedora
@@ -153,8 +153,8 @@ install_system_dependencies() {
             else
                 sudo dnf groupinstall -y "Development Tools" || \
                 sudo yum groupinstall -y "Development Tools"
-                sudo dnf install -y portaudio-devel ffmpeg python3-pyaudio || \
-                sudo yum install -y portaudio-devel ffmpeg python3-pyaudio
+                sudo dnf install -y portaudio-devel ffmpeg python3-pyaudio python3.12-devel portaudio-devel || \
+                sudo yum install -y portaudio-devel ffmpeg python3-pyaudio python3.12-devel portaudio-devel
             fi
 
         elif [ -f /etc/arch-release ]; then
