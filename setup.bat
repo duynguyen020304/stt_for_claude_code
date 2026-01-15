@@ -16,15 +16,23 @@ set "SCRIPT_DIR=%~dp0"
 set "SCRIPT_PATH=%SCRIPT_DIR%setup.ps1"
 set "PSH_EXE="
 
+REM Try PATH first
 where pwsh >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
     set "PSH_EXE=pwsh"
-) else (
+)
+
+if "%PSH_EXE%"=="" (
     where powershell >nul 2>nul
     if %ERRORLEVEL% EQU 0 (
         set "PSH_EXE=powershell"
     )
 )
+
+REM Try well-known install locations if PATH lookup failed
+if "%PSH_EXE%"=="" if exist "%ProgramFiles%\PowerShell\7\pwsh.exe" set "PSH_EXE=%ProgramFiles%\PowerShell\7\pwsh.exe"
+if "%PSH_EXE%"=="" if exist "%ProgramFiles(x86)%\PowerShell\7\pwsh.exe" set "PSH_EXE=%ProgramFiles(x86)%\PowerShell\7\pwsh.exe"
+if "%PSH_EXE%"=="" if exist "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" set "PSH_EXE=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
 
 if "%PSH_EXE%"=="" (
     echo ERROR: PowerShell is not available on this system.
