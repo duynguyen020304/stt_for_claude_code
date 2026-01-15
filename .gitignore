@@ -18,3 +18,18 @@ __pycache__/
 
 # ONNX model files
 *.onnx
+
+# Model files and directories
+models/
+*.bin
+*.pt
+*.pth
+*.nemo
+
+# Audio files
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.ogg
+audio_samples/
