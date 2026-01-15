@@ -60,6 +60,21 @@ function Get-ScriptRoot {
     return (Get-Location)
 }
 
+function Refresh-Path {
+    try {
+        $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+        $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+        if ($machinePath -or $userPath) {
+            $env:Path = ($machinePath, $userPath -join ";").Trim(";")
+            Write-Info "Refreshed PATH from system and user scopes"
+        }
+    }
+    catch {
+        Write-Warning "Could not refresh PATH; open a new terminal if new tools are missing"
+    }
+}
+
 function Test-PythonVersion {
     try {
         $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
@@ -108,13 +123,28 @@ function Install-Python {
 
     Write-Info "Installing Python 3.12 via winget..."
     winget install --id=Python.Python.3.12 -e --accept-source-agreements --accept-package-agreements
+    $wingetExitCode = $LASTEXITCODE
 
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "Python 3.12 installed via winget"
+    # Refresh PATH so a newly installed python/py is discoverable in this session
+    Refresh-Path
+    $postInstallCheck = Test-PythonVersion
+
+    if ($postInstallCheck.Compatible) {
+        if ($wingetExitCode -ne 0) {
+            Write-Warning "winget reported exit code $wingetExitCode, but Python is available; continuing"
+        }
+        else {
+            Write-Success "Python 3.12 installed via winget"
+        }
         return $true
     }
 
-    Write-Error "Failed to install Python 3.12 via winget. Please install manually from https://www.python.org/downloads/."
+    if ($wingetExitCode -eq 3010 -or $wingetExitCode -eq 1641) {
+        Write-Warning "winget reports install completed but requires a restart (exit code $wingetExitCode). Restart your terminal or log off/on, then re-run setup."
+        return $false
+    }
+
+    Write-Error "Failed to install Python 3.12 via winget (exit code $wingetExitCode). Please install manually from https://www.python.org/downloads/."
     return $false
 }
 
@@ -327,6 +357,7 @@ function Main {
                 exit 1
             }
             # Refresh python version info after installation attempt
+            Refresh-Path
             $pythonInfo = Test-PythonVersion
             if (-not $pythonInfo.Compatible) {
                 Write-Error "Python installation via winget did not complete successfully. Please install manually and re-run."

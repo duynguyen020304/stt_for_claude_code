@@ -87,6 +87,12 @@ The project includes automated setup scripts that handle:
 setup.bat
 ```
 
+**Windows prerequisites & tips:**
+
+- Ensure `winget` is available and run PowerShell as Administrator when prompted (winget may need elevation to install Python).
+- If Python installation appears to fail but Python is present, close and reopen the terminal, then re-run the setup script so the refreshed PATH is picked up.
+- If `winget` is unavailable, install Python 3.12 manually from https://www.python.org/downloads/ and re-run the script.
+
 If the batch launcher fails to locate the script, run PowerShell directly from the repo root:
 
 ```powershell
