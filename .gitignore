@@ -8,3 +8,13 @@
 .worktrees/
 .security-key
 logs/security/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ONNX model files
+*.onnx
