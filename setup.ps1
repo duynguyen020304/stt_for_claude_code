@@ -22,7 +22,7 @@ $REQUIREMENTS_CLIENT = "stt_desktop_client\requirements.txt"
 
 function Write-Header {
     param([string]$Message)
-    $separator = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    $separator = "============================================================"
     Write-Host "`n$separator" -ForegroundColor Cyan
     Write-Host "  $Message" -ForegroundColor Cyan
     Write-Host "$separator`n" -ForegroundColor Cyan
@@ -30,22 +30,22 @@ function Write-Header {
 
 function Write-Success {
     param([string]$Message)
-    Write-Host "✓ $Message" -ForegroundColor Green
+    Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
 function Write-Error {
     param([string]$Message)
-    Write-Host "✗ $Message" -ForegroundColor Red
+    Write-Host "[ERROR] $Message" -ForegroundColor Red
 }
 
 function Write-Warning {
     param([string]$Message)
-    Write-Host "⚠ $Message" -ForegroundColor Yellow
+    Write-Host "[WARN] $Message" -ForegroundColor Yellow
 }
 
 function Write-Info {
     param([string]$Message)
-    Write-Host "ℹ $Message" -ForegroundColor Cyan
+    Write-Host "[INFO] $Message" -ForegroundColor Cyan
 }
 
 function Test-PythonVersion {
