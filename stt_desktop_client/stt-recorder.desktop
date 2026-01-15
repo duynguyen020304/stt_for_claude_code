@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=STT Recorder
+GenericName=Speech-to-Text Recorder
+Comment=Record and transcribe audio using Vietnamese ASR models
+Exec=STT-Recorder %F
+Icon=stt-recorder
+Terminal=false
+Categories=Audio;AudioVideo;Utility;Recorder;
+Keywords=STT;Speech;Transcription;Recorder;Audio;Voice;Vietnamese;ASR;
+DBusActivatable=false
+StartupNotify=true

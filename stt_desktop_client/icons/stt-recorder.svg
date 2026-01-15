@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256"
+     xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle background -->
+  <circle cx="128" cy="128" r="120"
+          fill="#4A90D9" stroke="#2C5F8D" stroke-width="8.0"/>
+
+  <!-- Microphone body -->
+  <rect x="104" y="96" width="48" height="80"
+        rx="24.0" ry="24.0"
+        fill="#FFFFFF" stroke="#2C5F8D" stroke-width="6.0"/>
+
+  <!-- Microphone grille lines -->
+  <g stroke="#E0E0E0" stroke-width="4.0">
+    <line x1="112.0" y1="120.0"
+          x2="144.0" y2="120.0"/>
+    <line x1="112.0" y1="136.0"
+          x2="144.0" y2="136.0"/>
+    <line x1="112.0" y1="152.0"
+          x2="144.0" y2="152.0"/>
+  </g>
+
+  <!-- Microphone stand -->
+  <line x1="128" y1="176" x2="128" y2="208"
+        stroke="#FFFFFF" stroke-width="12.0" stroke-linecap="round"/>
+  <line x1="104.0" y1="208"
+        x2="152.0" y2="208"
+        stroke="#FFFFFF" stroke-width="12.0" stroke-linecap="round"/>
+
+  <!-- Sound waves -->
+  <path d="M 168 104.0
+           A 16.0 24.0 0 0 1 168 152.0"
+        fill="none" stroke="#FFFFFF" stroke-width="8.0" stroke-linecap="round"/>
+  <path d="M 192 96.0
+           A 24.0 32.0 0 0 1 192 160.0"
+        fill="none" stroke="#FFFFFF" stroke-width="8.0" stroke-linecap="round"/>
+</svg>
