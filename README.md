@@ -6,16 +6,17 @@ Includes a desktop client with PyQt6 that provides system tray integration and g
 
 ## Server Implementations
 
-| Implementation | Model | Framework | Recommended |
-|----------------|-------|-----------|-------------|
-| **Sherpa-ONNX** | csukuangfj/sherpa-onnx-zipformer-vi-2025-04-20 | ONNX Runtime | ✅ Yes |
-| ChunkFormer | khanhld/chunkformer-ctc-large-vie | PyTorch | Alternative |
+| Implementation  | Model                                          | Framework    | Recommended |
+| --------------- | ---------------------------------------------- | ------------ | ----------- |
+| **Sherpa-ONNX** | csukuangfj/sherpa-onnx-zipformer-vi-2025-04-20 | ONNX Runtime | ✅ Yes      |
+| ChunkFormer     | khanhld/chunkformer-ctc-large-vie              | PyTorch      | Alternative |
 
 The Sherpa-ONNX implementation is recommended for its simpler setup, faster inference, and smaller model size (~258 MB).
 
 ## Features
 
 ### Server
+
 - **Audio Transcription**: High-quality Vietnamese speech-to-text
 - **Multiple Input Formats**: Supports WAV, MP3, M4A, FLAC, OGG (auto-converts to WAV)
 - **Dual Interface**: REST API (`POST /transcribe`) and WebSocket (`/transcribe/ws`)
@@ -24,6 +25,7 @@ The Sherpa-ONNX implementation is recommended for its simpler setup, faster infe
 - **Auto Model Download**: Sherpa-ONNX model downloads automatically on first run
 
 ### Desktop Client
+
 - **Global Hotkey Recording**: Quick recording with customizable hotkey (default: `Ctrl+Alt+R`)
 - **System Tray Integration**: Runs in background with minimal footprint
 - **Auto-copy to Clipboard**: Transcribed text automatically copied to clipboard
@@ -33,6 +35,7 @@ The Sherpa-ONNX implementation is recommended for its simpler setup, faster infe
 ## Tech Stack
 
 ### Server (Sherpa-ONNX)
+
 - Python 3.12
 - FastAPI
 - Uvicorn
@@ -40,6 +43,7 @@ The Sherpa-ONNX implementation is recommended for its simpler setup, faster infe
 - ONNX Runtime
 
 ### Server (ChunkFormer - Alternative)
+
 - Python 3.12
 - FastAPI
 - Uvicorn
@@ -47,6 +51,7 @@ The Sherpa-ONNX implementation is recommended for its simpler setup, faster infe
 - PyTorch (CPU/GPU)
 
 ### Desktop Client
+
 - Python 3.12
 - PyQt6
 - sounddevice
@@ -58,27 +63,38 @@ The Sherpa-ONNX implementation is recommended for its simpler setup, faster infe
 ### Automated Setup (Recommended)
 
 The project includes automated setup scripts that handle:
+
 - Python 3.12 installation check (with automatic installation on Linux)
 - Virtual environment creation
 - All dependency installation (server & client)
 - System dependencies (PortAudio, FFmpeg)
 
 **Linux / macOS:**
+
 ```bash
 ./setup.sh
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
 .\setup.ps1
 ```
 
 **Windows (Batch):**
+
 ```cmd
 setup.bat
 ```
 
+If the batch launcher fails to locate the script, run PowerShell directly from the repo root:
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File .\setup.ps1
+```
+
 The script will guide you through optional dependencies:
+
 - **ChunkFormer server**: Alternative PyTorch-based model (larger, slower)
 - **Parakeet server**: English-only NeMo model (experimental)
 - **CUDA support**: GPU acceleration for Sherpa-ONNX
@@ -86,6 +102,7 @@ The script will guide you through optional dependencies:
 ### Manual Installation
 
 #### Prerequisites
+
 - Python 3.12+
 - pip
 - FFmpeg (for audio format conversion)
@@ -93,21 +110,25 @@ The script will guide you through optional dependencies:
 #### System Dependencies
 
 **Linux (Debian/Ubuntu):**
+
 ```bash
 sudo apt-get install libportaudio2 ffmpeg python3-pyaudio
 ```
 
 **Linux (Fedora):**
+
 ```bash
 sudo dnf install portaudio-devel ffmpeg python3-pyaudio
 ```
 
 **macOS:**
+
 ```bash
 brew install portaudio ffmpeg
 ```
 
 **Windows:**
+
 - Install FFmpeg: `winget install Gyan.FFmpeg`
 - PyAudio is included in the setup script
 
@@ -178,11 +199,13 @@ cd stt_desktop_client/src && python main.py
 ```
 
 **Optional arguments:**
+
 ```bash
 python main.py --server http://localhost:8000 --hotkey <ctrl>+<alt>+r
 ```
 
 **Using the client:**
+
 1. Press `Ctrl+Alt+R` to start recording
 2. Press `Ctrl+Alt+R` again to stop recording
 3. Wait for transcription to complete
@@ -192,20 +215,25 @@ python main.py --server http://localhost:8000 --hotkey <ctrl>+<alt>+r
 ## API Endpoints
 
 ### `GET /`
+
 API information and available endpoints.
 
 ### `GET /health`
+
 Health check endpoint. Returns model loading status.
 
 ### `POST /transcribe`
+
 Transcribe an audio file.
 
 **Request:**
+
 - Method: `POST`
 - Content-Type: `multipart/form-data`
 - Body: `audio` (file)
 
 **Response:**
+
 ```json
 {
   "text": "Transcribed text here",
@@ -220,6 +248,7 @@ Transcribe an audio file.
 ```
 
 ### `WS /transcribe/ws`
+
 WebSocket endpoint for streaming transcription.
 
 ## Configuration
@@ -228,26 +257,27 @@ WebSocket endpoint for streaming transcription.
 
 **Sherpa-ONNX Server** (`stt_server/server_sherpa_onnx.py`):
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `SHERPA_ONNX_MODEL` | `"csukuangfj/sherpa-onnx-zipformer-vi-2025-04-20"` | Model identifier |
-| `MODEL_DIR` | `"./models/sherpa-onnx-vi"` | Local model cache directory |
-| `NUM_THREADS` | `4` | CPU threads for inference |
-| `DEVICE` | `"cpu"` | Execution provider (cpu/cuda) |
+| Parameter           | Default                                            | Description                   |
+| ------------------- | -------------------------------------------------- | ----------------------------- |
+| `SHERPA_ONNX_MODEL` | `"csukuangfj/sherpa-onnx-zipformer-vi-2025-04-20"` | Model identifier              |
+| `MODEL_DIR`         | `"./models/sherpa-onnx-vi"`                        | Local model cache directory   |
+| `NUM_THREADS`       | `4`                                                | CPU threads for inference     |
+| `DEVICE`            | `"cpu"`                                            | Execution provider (cpu/cuda) |
 
 **ChunkFormer Server** (`stt_server/server_chunkformer_model.py`):
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `CHUNKFORMER_MODEL` | `"khanhld/chunkformer-ctc-large-vie"` | Model identifier |
-| `CHUNK_SIZE` | `64` | Audio chunk size for processing |
-| `LEFT_CONTEXT_SIZE` | `128` | Left context window |
-| `RIGHT_CONTEXT_SIZE` | `128` | Right context window |
-| `TOTAL_BATCH_DURATION` | `14400` | Max batch duration (4 hours) |
+| Parameter              | Default                               | Description                     |
+| ---------------------- | ------------------------------------- | ------------------------------- |
+| `CHUNKFORMER_MODEL`    | `"khanhld/chunkformer-ctc-large-vie"` | Model identifier                |
+| `CHUNK_SIZE`           | `64`                                  | Audio chunk size for processing |
+| `LEFT_CONTEXT_SIZE`    | `128`                                 | Left context window             |
+| `RIGHT_CONTEXT_SIZE`   | `128`                                 | Right context window            |
+| `TOTAL_BATCH_DURATION` | `14400`                               | Max batch duration (4 hours)    |
 
 ### GPU Support
 
 **Sherpa-ONNX:** Set `DEVICE = "cuda"` in `server_sherpa_onnx.py`. Install CUDA support with:
+
 ```bash
 pip install sherpa-onnx --extra-index-url https://pypi.nvidia.com
 ```
@@ -283,6 +313,7 @@ pip install sherpa-onnx --extra-index-url https://pypi.nvidia.com
 ### Sherpa-ONNX Model Download
 
 On first run, the Sherpa-ONNX server will download the model (~258 MB) from Hugging Face. Ensure you have:
+
 - Internet connection
 - Sufficient disk space (~300 MB recommended)
 - Write permissions in the project directory

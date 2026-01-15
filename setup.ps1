@@ -48,6 +48,18 @@ function Write-Info {
     Write-Host "[INFO] $Message" -ForegroundColor Cyan
 }
 
+function Get-ScriptRoot {
+    $candidates = @($PSScriptRoot, $PSCommandPath, ($MyInvocation.MyCommand.Path))
+    foreach ($candidate in $candidates) {
+        if ($candidate) {
+            return (Split-Path -Parent $candidate)
+        }
+    }
+
+    Write-Warning "Could not determine script path automatically; using current directory"
+    return (Get-Location)
+}
+
 function Test-PythonVersion {
     try {
         $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
@@ -301,10 +313,8 @@ function Main {
     Write-Header "STT for Claude Code - Automated Setup (Windows)"
 
     # Change to script directory
-    $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-    if ($scriptPath) {
-        Set-Location $scriptPath
-    }
+    $scriptPath = Get-ScriptRoot
+    Set-Location $scriptPath
 
     # Check Python version
     $pythonInfo = Test-PythonVersion

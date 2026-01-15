@@ -8,15 +8,17 @@ This is a **Speech-to-Text (STT) API service** built with FastAPI that provides 
 
 ### Available Server Implementations
 
-| Server | Model | Framework | Language | Port | Status |
-|--------|-------|-----------|----------|------|--------|
-| `server_sherpa_onnx.py` | Sherpa-ONNX Zipformer Vi | ONNX Runtime | Vietnamese | 8000 | **Primary** (Recommended) |
-| `server_chunkformer_model.py` | ChunkFormer CTC Vi | PyTorch | Vietnamese | 8000 | Alternative |
-| `server_parakeet_model.py` | NVIDIA Parakeet TDT CTC 110M | NeMo | English | 8000 | Experimental |
+| Server                        | Model                        | Framework    | Language   | Port | Status                    |
+| ----------------------------- | ---------------------------- | ------------ | ---------- | ---- | ------------------------- |
+| `server_sherpa_onnx.py`       | Sherpa-ONNX Zipformer Vi     | ONNX Runtime | Vietnamese | 8000 | **Primary** (Recommended) |
+| `server_chunkformer_model.py` | ChunkFormer CTC Vi           | PyTorch      | Vietnamese | 8000 | Alternative               |
+| `server_parakeet_model.py`    | NVIDIA Parakeet TDT CTC 110M | NeMo         | English    | 8000 | Experimental              |
 
 **Tech Stack:** Python 3.12, FastAPI, Uvicorn, Sherpa-ONNX (csukuangfj/sherpa-onnx-zipformer-vi-2025-04-20)
 
 ## Development Commands
+
+**Windows setup note:** Run the installer with `pwsh -ExecutionPolicy Bypass -File .\setup.ps1` from the repo root for the most reliable path detection. The `setup.bat` launcher is available as a convenience.
 
 **Start the Sherpa-ONNX server (recommended):**
 
@@ -129,17 +131,17 @@ Both servers auto-convert non-WAV formats (MP3, M4A, FLAC, OGG) to WAV using pyd
 
 ### Model Comparison
 
-| Aspect | Sherpa-ONNX (Recommended) | ChunkFormer (Alternative) | Parakeet (Experimental) |
-|--------|--------------------------|---------------------------|-------------------------|
-| Framework | ONNX Runtime | PyTorch | NeMo |
-| Language | Vietnamese | Vietnamese | English |
-| Model Size | ~258 MB | Larger | ~110M parameters |
-| Dependencies | sherpa-onnx only | torch, torchaudio, chunkformer | nemo-toolkit, librosa, soundfile |
-| Startup Time | Fast (small model) | Slower (large model) | Moderate |
-| Inference Speed | Fast (optimized ONNX) | Moderate | Fast (optimized) |
-| Long-form Audio | Processes entire file | Supports hours-long audio | Auto-splits >20min |
-| GPU Support | CUDA via ONNX | Native PyTorch CUDA | Native PyTorch CUDA |
-| Installation | Simple pip install | Requires PyTorch setup | Requires NeMo setup |
+| Aspect          | Sherpa-ONNX (Recommended) | ChunkFormer (Alternative)      | Parakeet (Experimental)          |
+| --------------- | ------------------------- | ------------------------------ | -------------------------------- |
+| Framework       | ONNX Runtime              | PyTorch                        | NeMo                             |
+| Language        | Vietnamese                | Vietnamese                     | English                          |
+| Model Size      | ~258 MB                   | Larger                         | ~110M parameters                 |
+| Dependencies    | sherpa-onnx only          | torch, torchaudio, chunkformer | nemo-toolkit, librosa, soundfile |
+| Startup Time    | Fast (small model)        | Slower (large model)           | Moderate                         |
+| Inference Speed | Fast (optimized ONNX)     | Moderate                       | Fast (optimized)                 |
+| Long-form Audio | Processes entire file     | Supports hours-long audio      | Auto-splits >20min               |
+| GPU Support     | CUDA via ONNX             | Native PyTorch CUDA            | Native PyTorch CUDA              |
+| Installation    | Simple pip install        | Requires PyTorch setup         | Requires NeMo setup              |
 
 ### CPU/GPU Handling
 
@@ -246,6 +248,7 @@ chmod +x build.sh
 **Solution:** The client forces Qt to use the XCB (X11) backend via XWayland for reliable clipboard support.
 
 **Implementation:** (`stt_desktop_client/src/tray_app.py`, lines 85-88)
+
 ```python
 # Force Qt to use XCB backend on Linux for better clipboard support
 # This works around KDE Plasma Wayland clipboard bugs
@@ -254,6 +257,7 @@ if sys.platform.startswith('linux'):
 ```
 
 This workaround is necessary because:
+
 1. Qt6's native Wayland clipboard has timing and ownership issues
 2. KDE Klipper may not properly sync with Qt Wayland apps
 3. XWayland provides stable clipboard support via the X11 protocol
@@ -268,6 +272,7 @@ This workaround is necessary because:
 - **GlobalHotkeyManager** (`hotkey_manager.py`) - Cross-platform hotkeys
 
 **Signal Flow:**
+
 ```
 Hotkey Press (listener thread) → toggle_recording()
 → start_recording() → status_changed signal → Tray tooltip update
@@ -278,6 +283,7 @@ Hotkey Press (listener thread) → toggle_recording()
 **Threading Model:**
 
 The application uses a multi-threaded architecture:
+
 - **Main Thread:** Qt event loop, UI updates, signal handling
 - **Hotkey Listener Thread:** `pynput.keyboard.Listener` runs in daemon thread
 - **Audio Callback Thread:** `sounddevice` callback writes to ring buffer
@@ -297,6 +303,7 @@ The `AudioRingBuffer` class (`audio_recorder.py:7-56`) is a thread-safe circular
 **Programmatic Icon Generation:**
 
 The tray icon is generated programmatically via QPainter (`tray_app.py:24-78`), eliminating external icon dependencies:
+
 - Blue circle background with white microphone graphics
 - Sound waves indicating recording capability
 - No external image files required
